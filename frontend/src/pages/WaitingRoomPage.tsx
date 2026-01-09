@@ -133,6 +133,15 @@ export function WaitingRoomPage() {
       setPlayers(prev => prev.filter(p => p.id !== data.playerId));
     });
     
+    // Listen for game restarted (Play Again)
+    socket.on('game_restarted', (data: { gameCode: string }) => {
+      console.log('🔄 Game restarted:', data.gameCode);
+      // Reset local state to waiting room
+      resetGame();
+      setRoomStatus('waiting');
+      lastCountdownValue.current = null;
+    });
+    
     // Cleanup on unmount
     return () => {
       cleanup();
@@ -142,6 +151,7 @@ export function WaitingRoomPage() {
       socket.off('countdown');
       socket.off('player_joined');
       socket.off('player_left');
+      socket.off('game_restarted');
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameCode, playerId]); // Removed initializeListeners & cleanup - they're stable
@@ -204,14 +214,15 @@ export function WaitingRoomPage() {
   
   // Handle Play Again
   const handlePlayAgain = () => {
-    // Reset game state and go back to waiting room
+    // Reset local game state
     resetGame();
     setRoomStatus('waiting');
     
-    // Re-emit join room to refresh state
+    // Emit restart_game to reset room on server
     const socket = socketService.getSocket();
     if (socket && gameCode && playerId) {
-      socket.emit('join_room_socket', { gameCode, playerId });
+      console.log('🔄 Restarting game:', { gameCode, playerId });
+      socket.emit('restart_game', { gameCode, playerId });
     }
   };
 

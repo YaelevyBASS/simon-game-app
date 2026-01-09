@@ -279,6 +279,48 @@ function registerPlatformHandlers(io: Server, socket: SocketWithSession): void {
       socket.emit('error', { message: 'Failed to start game' });
     }
   });
+
+  /**
+   * Restart game (play again)
+   */
+  socket.on('restart_game', (data: { gameCode: string; playerId: string }) => {
+    try {
+      const { gameCode, playerId } = data;
+      console.log(`🔄 restart_game: gameCode=${gameCode}, playerId=${playerId}`);
+      
+      // Verify room exists
+      const room = gameService.getRoom(gameCode);
+      if (!room) {
+        console.error(`❌ Room not found: ${gameCode}`);
+        socket.emit('error', { message: 'Room not found' });
+        return;
+      }
+      
+      // Reset room to waiting state
+      room.status = 'waiting';
+      room.gameState = null;
+      
+      console.log(`✅ Room ${gameCode} reset to waiting state`);
+      
+      // Broadcast updated room state to all players
+      io.to(gameCode).emit('room_state_update', {
+        ...room,
+        players: room.players.map(p => ({
+          id: p.id,
+          displayName: p.displayName,
+          avatarId: p.avatarId,
+          isHost: p.isHost,
+        })),
+      });
+      
+      // Also emit game_restarted event so clients know to reset
+      io.to(gameCode).emit('game_restarted', { gameCode });
+      
+    } catch (error) {
+      console.error('❌ restart_game error:', error);
+      socket.emit('error', { message: 'Failed to restart game' });
+    }
+  });
 }
 
 // =============================================================================
