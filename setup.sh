@@ -35,26 +35,23 @@ echo ""
 
 # Install dependencies
 echo "📦 Installing backend dependencies..."
-npm install
+npm install --silent
 
 echo ""
 echo "📦 Installing frontend dependencies..."
-cd frontend && npm install && cd ..
+cd frontend && npm install --silent && cd ..
 
 echo ""
 echo "═══════════════════════════════════════════════════"
 echo "   ✅ SETUP COMPLETE!"
 echo "═══════════════════════════════════════════════════"
 echo ""
-echo "   To start the app, open TWO terminals:"
+echo "   🚀 Starting servers..."
+echo "   📍 Frontend: http://localhost:5173"
+echo "   📍 Backend:  http://localhost:3000"
 echo ""
-echo "   Terminal 1 (Backend):"
-echo "   $ npm run dev:backend"
-echo ""
-echo "   Terminal 2 (Frontend):"
-echo "   $ cd frontend && npm run dev"
-echo ""
-echo "   Then open: http://localhost:5173"
+echo "   ⏳ Wait for servers to start, then open the browser."
+echo "   🛑 Press Ctrl+C to stop the servers."
 echo ""
 echo "═══════════════════════════════════════════════════"
 echo ""
